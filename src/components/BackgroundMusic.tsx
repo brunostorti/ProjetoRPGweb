@@ -44,7 +44,7 @@ export default function BackgroundMusic({ musicKey }: BackgroundMusicProps) {
     audio.volume = 0.3; // Volume moderado
     
     // Tentar tocar (pode falhar se o usuário não interagiu ainda)
-    audio.play().catch((error) => {
+    audio.play().catch(() => {
       // Ignorar erros de autoplay (normal em navegadores modernos)
       console.log('Autoplay bloqueado. O usuário precisará interagir primeiro.');
     });

@@ -36,7 +36,7 @@ export default function StoryScreen({
   choiceHistory = [],
 }: StoryScreenProps) {
   const [textComplete, setTextComplete] = useState(false);
-  const [currentNode, setCurrentNode] = useState<StoryNode | null>(getNodeById(currentNodeId));
+  const [currentNode, setCurrentNode] = useState<StoryNode | null>(getNodeById(currentNodeId) || null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStoryText, setCurrentStoryText] = useState<string>('');
 

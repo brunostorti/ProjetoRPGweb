@@ -21,7 +21,7 @@ function App() {
   const [gameState, setGameState] = useState<GameState>('intro');
   const [playerData, setPlayerData] = useState<PlayerData | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  const [useAI, setUseAI] = useState<boolean>(true); // Modo IA ativado por padrão
+  const [useAI] = useState<boolean>(true); // Modo IA ativado por padrão
   const [choiceHistory, setChoiceHistory] = useState<string[]>([]);
 
   const handleStart = (data: PlayerData) => {

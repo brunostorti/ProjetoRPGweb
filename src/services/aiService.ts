@@ -106,9 +106,8 @@ function createFallbackNode(params: GenerateStoryParams): StoryNode {
  */
 export async function checkAIAvailability(): Promise<boolean> {
   try {
-    const apiUrl = import.meta.env.PROD
-      ? '/api/generate-story'
-      : 'http://localhost:3000/api/generate-story';
+    // Sempre usar a API relativa (funciona em produção)
+    const apiUrl = '/api/generate-story';
 
     // Fazer uma requisição de teste (sem corpo, só para verificar se o endpoint existe)
     const response = await fetch(apiUrl, {
