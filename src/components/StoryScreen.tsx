@@ -4,7 +4,7 @@
  * Suporta geração dinâmica com IA
  */
 import { useState, useEffect } from 'react';
-import { ScenarioId, StoryNode } from '../types/story';
+import { ScenarioId, StoryNode, Mood } from '../types/story';
 import { getNodeById, getStartNodeId } from '../story/storyEngine';
 import { generateStoryWithAI } from '../services/aiService';
 import TypewriterText from './TypewriterText';
@@ -110,7 +110,7 @@ export default function StoryScreen({
   if (isGenerating) {
     return <LoadingScreen 
       bgKey={currentNode?.bgKey || 'alley-dark'} 
-      mood={currentNode?.mood || 'normal'}
+      mood={(currentNode?.mood || 'normal') as Mood}
       scenario={scenario}
     />;
   }

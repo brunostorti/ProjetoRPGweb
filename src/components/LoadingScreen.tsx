@@ -3,12 +3,12 @@
  * Melhora a experiência durante a geração da IA
  */
 import { useState, useEffect } from 'react';
-import { ScenarioId } from '../types/story';
+import { ScenarioId, Mood } from '../types/story';
 import BackgroundScene from './BackgroundScene';
 
 interface LoadingScreenProps {
   bgKey: string;
-  mood: string;
+  mood: Mood;
   scenario: ScenarioId;
 }
 
