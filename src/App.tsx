@@ -21,12 +21,15 @@ function App() {
   const [gameState, setGameState] = useState<GameState>('intro');
   const [playerData, setPlayerData] = useState<PlayerData | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
+  const [useAI, setUseAI] = useState<boolean>(true); // Modo IA ativado por padrão
+  const [choiceHistory, setChoiceHistory] = useState<string[]>([]);
 
   const handleStart = (data: PlayerData) => {
     setPlayerData(data);
     // Definir a cena inicial baseada no cenário escolhido
     const startNodeId = getStartNodeId(data.scenario);
     setCurrentNodeId(startNodeId);
+    setChoiceHistory([]); // Resetar histórico
     setGameState('story');
   };
 
@@ -34,9 +37,13 @@ function App() {
     setGameState('intro');
     setPlayerData(null);
     setCurrentNodeId(null);
+    setChoiceHistory([]);
   };
 
-  const handleNodeChange = (nodeId: string) => {
+  const handleNodeChange = (nodeId: string, choiceLabel?: string) => {
+    if (choiceLabel) {
+      setChoiceHistory(prev => [...prev, choiceLabel]);
+    }
     setCurrentNodeId(nodeId);
   };
 
@@ -54,6 +61,8 @@ function App() {
           currentNodeId={currentNodeId}
           onNodeChange={handleNodeChange}
           onRestart={handleRestart}
+          useAI={useAI}
+          choiceHistory={choiceHistory}
         />
       )}
     </div>
