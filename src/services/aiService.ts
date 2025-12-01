@@ -31,13 +31,20 @@ export async function generateStoryWithAI(
     // No Vercel, a API fica na mesma origem
     const apiUrl = '/api/generate-story';
 
+    // Timeout de 15 segundos no cliente também
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(params),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -53,6 +60,11 @@ export async function generateStoryWithAI(
     return data.node;
   } catch (error: any) {
     console.error('Erro ao gerar história com IA:', error);
+    
+    // Se for timeout, retornar fallback mais rápido
+    if (error.name === 'AbortError') {
+      console.log('Timeout na requisição, usando fallback rápido');
+    }
     
     // Retornar nó de fallback em caso de erro
     return createFallbackNode(params);

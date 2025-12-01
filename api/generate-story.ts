@@ -109,33 +109,43 @@ FORMATO DE RESPOSTA (JSON):
 IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
 
     // Usar Hugging Face Inference API (gratuita, sem necessidade de API key para modelos públicos)
-    // Modelo: meta-llama/Meta-Llama-3-8B-Instruct (gratuito e rápido)
-    const model = "meta-llama/Meta-Llama-3-8B-Instruct";
+    // Modelo mais rápido: microsoft/Phi-3-mini-4k-instruct (mais leve e rápido)
+    // Fallback: meta-llama/Meta-Llama-3-8B-Instruct
+    const model = "microsoft/Phi-3-mini-4k-instruct";
     
     // Se você tiver uma API key do Hugging Face (opcional, mas aumenta limites)
     const hfToken = process.env.HUGGINGFACE_API_KEY || null;
     
-    const response = await fetch(
-      `https://api-inference.huggingface.co/models/${model}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(hfToken && { 'Authorization': `Bearer ${hfToken}` })
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 800,
-            temperature: 0.8,
-            return_full_text: false,
-            do_sample: true
-          }
-        })
-      }
-    );
+    // Criar AbortController para timeout de 20 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    
+    try {
+      const response = await fetch(
+        `https://api-inference.huggingface.co/models/${model}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(hfToken && { 'Authorization': `Bearer ${hfToken}` })
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters: {
+              max_new_tokens: 500, // Reduzido para gerar mais rápido
+              temperature: 0.7, // Reduzido para ser mais consistente e rápido
+              return_full_text: false,
+              do_sample: true,
+              top_p: 0.9 // Adicionado para melhor performance
+            }
+          }),
+          signal: controller.signal
+        }
+      );
 
-    if (!response.ok) {
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
       const errorText = await response.text();
       console.error('Erro Hugging Face:', errorText);
       
@@ -219,7 +229,7 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
       nextId: 'ai_generated'
     }));
 
-    return res.status(200).json({
+      return res.status(200).json({
       success: true,
       node: {
         id: `ai_node_${Date.now()}`,
@@ -232,6 +242,20 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
       }
     });
 
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      
+      // Se for timeout, retornar fallback rápido
+      if (fetchError.name === 'AbortError') {
+        console.log('Timeout na requisição, retornando fallback');
+        return res.status(200).json({
+          success: true,
+          node: createQuickFallbackNode(scenario, playerChoice)
+        });
+      }
+      
+      throw fetchError;
+    }
   } catch (error: any) {
     console.error('Erro ao gerar história:', error);
     
@@ -241,4 +265,42 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
+}
+
+// Função auxiliar para criar fallback rápido
+function createQuickFallbackNode(scenario: string, playerChoice: string) {
+  const bgKeys: Record<string, string> = {
+    medieval: 'tavern-warm',
+    zombie: 'supermarket-dark',
+    cyberpunk: 'neon-alley'
+  };
+
+  return {
+    id: `fallback_${Date.now()}`,
+    scenario: scenario as any,
+    text: `Você escolheu: "${playerChoice}".\n\nA história continua de forma inesperada. Suas ações têm consequências, e o destino se desenrola diante de seus olhos...`,
+    mood: 'normal' as const,
+    bgKey: bgKeys[scenario] || 'alley-dark',
+    musicKey: scenario === 'medieval' ? 'medieval_suspense' : scenario === 'zombie' ? 'zombie_low_drone' : 'cyber_synthwave',
+    choices: [
+      {
+        id: `fallback_choice_1_${Date.now()}`,
+        label: '[Enganar/Carisma] Tentar negociar ou convencer',
+        tag: 'carisma' as const,
+        nextId: 'ai_generated'
+      },
+      {
+        id: `fallback_choice_2_${Date.now()}`,
+        label: '[Ação/Fuga] Agir rapidamente ou fugir',
+        tag: 'acao' as const,
+        nextId: 'ai_generated'
+      },
+      {
+        id: `fallback_choice_3_${Date.now()}`,
+        label: '[Combate/Surpresa] Confrontar diretamente',
+        tag: 'combate' as const,
+        nextId: 'ai_generated'
+      }
+    ]
+  };
 }

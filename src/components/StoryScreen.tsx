@@ -11,6 +11,7 @@ import TypewriterText from './TypewriterText';
 import ChoiceButton from './ChoiceButton';
 import BackgroundScene from './BackgroundScene';
 import BackgroundMusic from './BackgroundMusic';
+import LoadingScreen from './LoadingScreen';
 
 interface StoryScreenProps {
   playerName: string;
@@ -107,19 +108,11 @@ export default function StoryScreen({
 
   // Mostrar loading enquanto gera com IA
   if (isGenerating) {
-    return (
-      <BackgroundScene bgKey={currentNode?.bgKey || 'alley-dark'} mood={currentNode?.mood || 'normal'}>
-        <div className="story-screen">
-          <div className="story-card">
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p className="loading-text">A IA está criando sua próxima aventura...</p>
-              <p className="loading-subtext">Isso pode levar alguns segundos</p>
-            </div>
-          </div>
-        </div>
-      </BackgroundScene>
-    );
+    return <LoadingScreen 
+      bgKey={currentNode?.bgKey || 'alley-dark'} 
+      mood={currentNode?.mood || 'normal'}
+      scenario={scenario}
+    />;
   }
 
   if (!currentNode) {
