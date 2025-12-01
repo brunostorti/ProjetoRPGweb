@@ -146,7 +146,7 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-      const errorText = await response.text();
+        const errorText = await response.text();
       console.error('Erro Hugging Face:', errorText);
       
       // Se o modelo estiver carregando, retornar fallback
@@ -157,10 +157,10 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
         });
       }
       
-      throw new Error(`Hugging Face API error: ${response.status}`);
-    }
+        throw new Error(`Hugging Face API error: ${response.status}`);
+      }
 
-    const data = await response.json();
+      const data = await response.json();
     
     // Extrair texto gerado
     let generatedText = '';
@@ -230,17 +230,17 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem markdown ou texto adicional.`;
     }));
 
       return res.status(200).json({
-      success: true,
-      node: {
+        success: true,
+        node: {
         id: `ai_node_${Date.now()}`,
         scenario,
         text: storyData.text,
         mood: storyData.mood || 'normal',
         bgKey: storyData.bgKey || (scenario === 'medieval' ? 'tavern-warm' : scenario === 'zombie' ? 'supermarket-dark' : 'neon-alley'),
         musicKey: scenario === 'medieval' ? 'medieval_suspense' : scenario === 'zombie' ? 'zombie_low_drone' : 'cyber_synthwave',
-        choices: storyData.choices
-      }
-    });
+          choices: storyData.choices
+        }
+      });
 
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
